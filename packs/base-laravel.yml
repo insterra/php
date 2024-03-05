@@ -90,8 +90,8 @@ sections:
   description: |
     Web service kit will enable service on port 8000 and provision the database automatically for your application.
 
-    The `generic/secret` driver will automatically generate secret with the length `64` character to be used as your `SECRET_KEY_BASE`
-  attributes: 
+    The `generic/secret` driver will automatically generate secret with the length `64` character to be used as your `APP_KEY`
+  attributes:
     name: "web"
     description: "web service"
     main: true
