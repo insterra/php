@@ -1,0 +1,112 @@
+name: base-laravel
+type: template
+description: Deploy laravel with octane
+frameworks: [laravel]
+visibility: public
+dependencies: [
+  { type: build, main: true, package_name: php82 },
+  { type: build, package_name: npm },
+  { type: build, package_name: composer },
+  { type: build, package_name: php82-session },
+  { type: build, package_name: php82-fileinfo },
+  { type: build, package_name: php82-tokenizer },
+  { type: build, package_name: php82-dom },
+  { type: build, package_name: php82-xml },
+  { type: build, package_name: php82-xmlwriter },
+  { type: runtime, package_name: php82 },
+  { type: build, package_name: composer },
+  { type: build, package_name: php82-session },
+  { type: build, package_name: php82-fileinfo },
+  { type: build, package_name: php82-tokenizer },
+  { type: build, package_name: php82-dom },
+  { type: build, package_name: php82-xml },
+  { type: build, package_name: php82-xmlwriter },
+  { type: build, package_name: php82-pcntl },
+  { type: runtime, package_name: bash },
+  { type: runtime, package_name: curl },
+  { type: runtime, package_name: s6 },
+  { type: runtime, package_name: jq },
+  { type: runtime, package_name: ca-certificates }
+]
+sections:
+- name: build
+  description: |
+    Build the laravel app for production deployment with octane and npm.
+
+    The following will build the app for production deployment.
+  attributes:
+    destinations: [
+      "*"
+    ]
+    command: |
+      export APP_ENV=production
+      export APP_DEBUG=false
+
+      composer install --optimize-autoloader --no-dev
+      php artisan octane:install --server=frankenphp --no-interaction
+      php artisan config:cache
+      php artisan event:cache
+      php artisan route:cache
+      php artisan view:cache
+      php artisan optimize
+
+      npm install
+      npm run build
+- name: run
+  description: |
+    This section tells the build configuration how your application is run.
+
+    We describe the commands and services available in the package.
+
+    When the migrate command is run it will execute `php artisan migrate` and when the service starts it will call `php artisan octane:start --server=frankenphp`
+  attributes:
+    name: "{{name}}"
+    commands: [
+      { name: migrate, binary: php, path: /usr/bin, call: 'artisan migrate' },
+      { name: console, binary: php, path: /usr/bin, call: 'artisan tinker' },
+      { name: logs, binary: tail, path: /usr/bin, call: "-f -n 100 /var/log/{{name}}/current" }
+    ]
+    services: [
+      { name: web, binary: php, path: /usr/bin, start: { call: 'artisan octane:start --server=frankenphp' }}
+    ]
+- name: hook
+  description: |
+    This section describes the hooks available in the package.
+
+    When the package is built, the `build` hook will be executed. When the package is deployed, the `deploy` hook will be executed.
+  attributes: 
+    post-install: |
+      rc-update add {{name}}
+      rc-service {{name}} migrate
+    pre-upgrade: |
+      rc-service {{name}} stop
+    post-upgrade: |
+      rc-service {{name}} migrate
+      rc-service {{name}} start
+    post-deinstall: |
+      rc-service {{name}} stop
+      rc-update del {{name}}
+- name: kit
+  description: |
+    Web service kit will enable service on port 8000 and provision the database automatically for your application.
+
+    The `generic/secret` driver will automatically generate secret with the length `64` character to be used as your `SECRET_KEY_BASE`
+  attributes: 
+    name: "web"
+    description: "web service"
+    main: true
+    ports: [
+      { name: "web", target: 8000, main: true }
+    ]
+    variables: [
+      { key: "APP_ENV", default_value: "production" },
+      { key: "OCTANE_SERVER", default_value: "frankenphp" },
+      {
+        key: "APP_KEY",
+        driver: "generic/secret",
+        driver_options: { 
+          length: 32,
+          framework: "laravel" 
+        }
+      }
+    ]

@@ -1,0 +1,27 @@
+name: postgresql
+type: extension
+parent_name: base-laravel
+description: Postgresql extension for base-laravel pack
+frameworks: [pgsql]
+visibility: public
+dependencies: [
+  { type: runtime, package_name: php82-pgsql }
+]
+service_requirements: [
+  { condition: must, service_name: postgresql }
+]
+sections: 
+- name: kit
+  description: |
+    The `database/postgresql` driver exposes the following:
+
+    - DB_URL
+
+    You can access these as env variables in your application.
+  attributes: 
+    name: web
+    variables: [
+      { key: "DB", driver: "database/postgresql" },
+      { key: "DB_CONNECTION", default_value: "pgsql" }
+    ]
+
