@@ -79,10 +79,12 @@ sections:
   attributes: 
     post-install: |
       rc-update add {{name}}
+      rc-service {{name}} configure
       rc-service {{name}} migrate
     pre-upgrade: |
       rc-service {{name}} stop
     post-upgrade: |
+      rc-service {{name}} configure
       rc-service {{name}} migrate
       rc-service {{name}} start
     post-deinstall: |
