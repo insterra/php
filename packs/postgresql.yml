@@ -5,7 +5,8 @@ description: Postgresql extension for base-laravel pack
 frameworks: [pgsql]
 visibility: public
 dependencies: [
-  { type: runtime, package_name: php82-pgsql }
+  { type: runtime, package_name: php82-pgsql },
+  { type: runtime, package_name: php82-pdo_pgsql }
 ]
 service_requirements: [
   { condition: must, service_name: postgresql }
@@ -21,7 +22,7 @@ sections:
   attributes: 
     name: web
     variables: [
-      { key: "DB", driver: "database/postgresql" },
+      { key: "DATABASE", driver: "database/postgresql" },
       { key: "DB_CONNECTION", default_value: "pgsql" }
     ]
 
