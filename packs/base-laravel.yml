@@ -63,7 +63,7 @@ sections:
   attributes:
     name: "{{name}}"
     commands: [
-      { name: migrate, binary: php, path: /usr/bin, call: 'artisan migrate --no-interaction' },
+      { name: migrate, binary: php, path: /usr/bin, call: 'artisan migrate --force --no-interaction' },
       { name: console, binary: php, path: /usr/bin, call: 'artisan tinker' },
       { name: configure, binary: php, path: /usr/bin, call: 'artisan config:cache' },
       { name: logs, binary: tail, path: /usr/bin, call: "-f -n 100 /var/log/{{name}}/current" }
