@@ -36,6 +36,7 @@ sections:
 
     The following will build the app for production deployment.
   attributes:
+    strip_binary: false
     destinations: [
       "*"
     ]
